@@ -1,0 +1,13 @@
+echo "# Binaries
+*.exe
+*.out
+*.test
+
+# Go workspace
+go.work.sum
+
+# VS Code
+.vscode/
+
+# Env files
+.env" > .gitignore
