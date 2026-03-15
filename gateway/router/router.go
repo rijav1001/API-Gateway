@@ -3,14 +3,14 @@ package router
 import (
 	"net/http"
 	"net/http/httputil"
-	"net/url"
 	"strings"
+
+	"github.com/rijav1001/API-Gateway/gateway/loadbalancer"
 )
 
 type Route struct {
 	Prefix  string
-	Targets []string
-	current int
+	LB		*loadbalancer.LoadBalancer
 }
 
 type Router struct {
@@ -21,27 +21,24 @@ func NewRouter() *Router {
 	return &Router{}
 }
 
-func (r *Router) AddRoute(prefix string, targets []string) {
+func (r *Router) AddRoute(prefix string, targets []string) error {
+	lb, err := loadbalancer.New(targets)
+	if err != nil {
+		return err
+	}
 	r.routes = append(r.routes, &Route{
 		Prefix:  prefix,
-		Targets: targets,
+		LB: lb,
 	})
+	return nil
 }
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	for _, route := range r.routes {
 		if strings.HasPrefix(req.URL.Path, route.Prefix) {
 			// Round-robin load balancing
-			target := route.Targets[route.current % len(route.Targets)]
-			route.current++
-
-			targetURL, err := url.Parse(target)
-			if err != nil {
-				http.Error(w, "Bad gateway", http.StatusBadGateway)
-				return
-			}
-
-			proxy := httputil.NewSingleHostReverseProxy(targetURL)
+			target := route.LB.Next()
+			proxy := httputil.NewSingleHostReverseProxy(target)
 			proxy.ServeHTTP(w, req)
 			return
 		}

@@ -16,8 +16,12 @@ func main() {
 	defer logger.Sync()
 
 	r := router.NewRouter()
-	r.AddRoute("/users", []string{"http://localhost:8081"})
-	r.AddRoute("/orders", []string{"http://localhost:8082"})
+	if err := r.AddRoute("/users", []string{"http://localhost:8081"}); err != nil {
+		log.Fatal("Failed to add users route:", err)
+	}
+	if err := r.AddRoute("/orders", []string{"http://localhost:8082"}); err != nil {
+		log.Fatal("Failed to add orders route:", err)
+	}
 
 	rl := middleware.NewRateLimiter(5, 10) // 5 tokens/sec, max 10
 
