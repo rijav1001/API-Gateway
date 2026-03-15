@@ -18,11 +18,11 @@ spec:
           imagePullPolicy: Never
           ports:
             - containerPort: 8080
-          env:
-            - name: USER_SERVICE_URL
-              value: "http://user-service:8081"
-            - name: ORDER_SERVICE_URL
-              value: "http://order-service:8082"
+          envFrom:
+            - configMapRef:
+                name: gateway-config
+            - secretRef:
+                name: gateway-secret
 ---
 apiVersion: v1
 kind: Service
