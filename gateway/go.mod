@@ -1,6 +1,6 @@
 module github.com/rijav1001/API-Gateway/gateway
 
-go 1.26.1
+go 1.23.0
 
 require (
 	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect

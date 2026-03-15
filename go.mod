@@ -1,6 +1,6 @@
 module github.com/rijav1001/API-Gateway
 
-go 1.26.1
+go 1.23.0
 
 require go.uber.org/zap v1.27.1
 

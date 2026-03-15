@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/rijav1001/API-Gateway/gateway/dashboard"
 	"github.com/rijav1001/API-Gateway/gateway/middleware"
@@ -11,15 +12,25 @@ import (
 	"go.uber.org/zap"
 )
 
+func getEnv(key, fallback string) string {
+	if val := os.Getenv(key); val != "" {
+		return val
+	}
+	return fallback
+}
+
 func main() {
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 
 	r := router.NewRouter()
-	if err := r.AddRoute("/users", []string{"http://localhost:8081"}); err != nil {
+
+	userService := getEnv("USER_SERVICE_URL", "http://localhost:8081")
+	orderService := getEnv("ORDER_SERVICE_URL", "http://localhost:8082")
+	if err := r.AddRoute("/users", []string{userService}); err != nil {
 		log.Fatal("Failed to add users route:", err)
 	}
-	if err := r.AddRoute("/orders", []string{"http://localhost:8082"}); err != nil {
+	if err := r.AddRoute("/orders", []string{orderService}); err != nil {
 		log.Fatal("Failed to add orders route:", err)
 	}
 
