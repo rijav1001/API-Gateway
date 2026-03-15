@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Install dependencies
+        run: |
+          cd gateway && go mod download
+          cd ../services/user-service && go mod download
+          cd ../order-service && go mod download
+
+      - name: Build gateway
+        run: go build -o api-gateway ./gateway/
+
+      - name: Build user-service
+        run: cd services/user-service && go build -o user-service .
+
+      - name: Build order-service
+        run: cd services/order-service && go build -o order-service .
+
+      - name: Build Docker images
+        run: |
+          docker build -f Dockerfile.gateway -t api-gateway:v1 .
+          docker build -t user-service:v1 services/user-service/
+          docker build -t order-service:v1 services/order-service/
